@@ -1,5 +1,5 @@
 import * as Device from "expo-device";
-import { Button, Platform, ScrollView, StyleSheet } from "react-native";
+import { Button, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -8,6 +8,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { WebBadge } from "@/components/web-badge";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 import { useState } from "react";
 
 function getDevMenuHint() {
@@ -30,11 +31,21 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const theme = useTheme();
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [inputValue, setInputValue] = useState("");
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    const trimmed = inputValue.trim();
+    if (!trimmed) {
+      return;
+    }
+    setItems([...items, trimmed]);
+    setInputValue("");
+  };
+
+  const deleteItemAt = (index: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -46,17 +57,29 @@ export default function HomeScreen() {
             ToDo List
           </ThemedText>
         </ThemedView>
-        <ThemedView style={styles.heroSection}>
-          <Button title={"Add todo"} onPress={addItem} />
-        </ThemedView>
+
+        <View style={styles.inputRow}>
+          <TextInput
+            value={inputValue}
+            onChangeText={setInputValue}
+            placeholder="New todo..."
+            placeholderTextColor={theme.textSecondary}
+            onSubmitEditing={addItem}
+            style={[
+              styles.input,
+              { color: theme.text, backgroundColor: theme.backgroundElement, borderColor: theme.backgroundSelected },
+            ]}
+          />
+          <Button title={"Add"} onPress={addItem} />
+        </View>
 
         <ThemedText type="code" style={styles.code}>
           Your todos:
         </ThemedText>
         <ScrollView style={styles.scrollContainer}>
           <ThemedView type="backgroundElement" style={styles.stepContainer}>
-            {items.map((item) => (
-              <HintRow key={item} title={item} />
+            {items.map((item, index) => (
+              <HintRow key={`${item}-${index}`} title={item} onDelete={() => deleteItemAt(index)} />
             ))}
           </ThemedView>
         </ScrollView>
@@ -85,6 +108,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: Spacing.four,
     gap: Spacing.four,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.two,
+    alignSelf: "stretch",
+    paddingHorizontal: Spacing.four,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
   },
   title: {
     textAlign: "center",
