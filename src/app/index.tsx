@@ -1,5 +1,12 @@
 import * as Device from "expo-device";
-import { Button, Platform, ScrollView, StyleSheet } from "react-native";
+import {
+  Button,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -32,9 +39,16 @@ function getDevMenuHint() {
 export default function HomeScreen() {
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
 
+  const [text, setText] = useState("");
+
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    if (!text.trim()) return;
+    setItems([...items, text]);
+    setText("");
+  };
+
+  const deleteItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
   };
 
   return (
@@ -47,6 +61,12 @@ export default function HomeScreen() {
           </ThemedText>
         </ThemedView>
         <ThemedView style={styles.heroSection}>
+          <TextInput
+            style={styles.input}
+            value={text}
+            onChangeText={setText}
+            placeholder="New todo"
+          />
           <Button title={"Add todo"} onPress={addItem} />
         </ThemedView>
 
@@ -55,8 +75,11 @@ export default function HomeScreen() {
         </ThemedText>
         <ScrollView style={styles.scrollContainer}>
           <ThemedView type="backgroundElement" style={styles.stepContainer}>
-            {items.map((item) => (
-              <HintRow key={item} title={item} />
+            {items.map((item, index) => (
+              <View key={index} style={styles.row}>
+                <HintRow title={item} />
+                <Button title="Delete" onPress={() => deleteItem(index)} />
+              </View>
             ))}
           </ThemedView>
         </ScrollView>
@@ -97,6 +120,19 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.four,
+  },
+  input: {
+    width: 250,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    padding: 8,
+    backgroundColor: "white",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   scrollContainer: {
     height: 200,
