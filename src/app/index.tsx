@@ -1,5 +1,5 @@
 import * as Device from "expo-device";
-import { Button, Platform, ScrollView, StyleSheet } from "react-native";
+import { Button, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -31,10 +31,16 @@ function getDevMenuHint() {
 
 export default function HomeScreen() {
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [inputText, setInputText] = useState<string>("");
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    if (inputText.trim() === "") return;
+    setItems([...items, inputText]);
+    setInputText("");
+  };
+
+  const removeItem = (indexToRemove: number) => {
+    setItems(items.filter((_, index) => index !== indexToRemove));
   };
 
   return (
@@ -47,6 +53,13 @@ export default function HomeScreen() {
           </ThemedText>
         </ThemedView>
         <ThemedView style={styles.heroSection}>
+          <TextInput
+            style={styles.input}
+            placeholder="Введите задачу"
+            placeholderTextColor="#999"
+            value={inputText}
+            onChangeText={setInputText}
+          />
           <Button title={"Add todo"} onPress={addItem} />
         </ThemedView>
 
@@ -55,8 +68,13 @@ export default function HomeScreen() {
         </ThemedText>
         <ScrollView style={styles.scrollContainer}>
           <ThemedView type="backgroundElement" style={styles.stepContainer}>
-            {items.map((item) => (
-              <HintRow key={item} title={item} />
+            {items.map((item, index) => (
+              <View key={`${item}-${index}`} style={styles.row}>
+                <View style={styles.rowItem}>
+                  <HintRow title={item} />
+                </View>
+                <Button title="Delete" onPress={() => removeItem(index)} />
+              </View>
             ))}
           </ThemedView>
         </ScrollView>
@@ -102,5 +120,25 @@ const styles = StyleSheet.create({
     height: 200,
     width: "100%",
     borderRadius: Spacing.four,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 8,
+    width: "100%",
+    minWidth: 200,
+    color: "#fff",
+    backgroundColor: "#333",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  rowItem: {
+    flex: 1,
   },
 });
