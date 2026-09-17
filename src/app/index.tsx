@@ -1,5 +1,11 @@
-import * as Device from "expo-device";
-import { Button, Platform, ScrollView, StyleSheet } from "react-native";
+import {
+  Button,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -10,31 +16,25 @@ import { WebBadge } from "@/components/web-badge";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { useState } from "react";
 
-function getDevMenuHint() {
-  if (Platform.OS === "web") {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === "android" ? "cmd+m (or ctrl+m)" : "cmd+d";
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
-
 export default function HomeScreen() {
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [newItem, setNewItem] = useState("");
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    const trimmedItem = newItem.trim();
+
+    if (!trimmedItem) {
+      return;
+    }
+
+    setItems((currentItems) => [...currentItems, trimmedItem]);
+    setNewItem("");
+  };
+
+  const deleteItem = (indexToDelete: number) => {
+    setItems((currentItems) =>
+      currentItems.filter((_, index) => index !== indexToDelete),
+    );
   };
 
   return (
@@ -46,8 +46,16 @@ export default function HomeScreen() {
             ToDo List
           </ThemedText>
         </ThemedView>
-        <ThemedView style={styles.heroSection}>
-          <Button title={"Add todo"} onPress={addItem} />
+        <ThemedView style={styles.formSection}>
+          <TextInput
+            accessibilityLabel="New todo"
+            placeholder="Enter a todo"
+            value={newItem}
+            onChangeText={setNewItem}
+            onSubmitEditing={addItem}
+            style={styles.input}
+          />
+          <Button title="Add todo" onPress={addItem} />
         </ThemedView>
 
         <ThemedText type="code" style={styles.code}>
@@ -55,8 +63,13 @@ export default function HomeScreen() {
         </ThemedText>
         <ScrollView style={styles.scrollContainer}>
           <ThemedView type="backgroundElement" style={styles.stepContainer}>
-            {items.map((item) => (
-              <HintRow key={item} title={item} />
+            {items.map((item, index) => (
+              <View key={`${item}-${index}`} style={styles.todoRow}>
+                <View style={styles.todoText}>
+                  <HintRow title={item} />
+                </View>
+                <Button title="Delete" onPress={() => deleteItem(index)} />
+              </View>
             ))}
           </ThemedView>
         </ScrollView>
@@ -86,6 +99,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     gap: Spacing.four,
   },
+  formSection: {
+    alignSelf: "stretch",
+    gap: Spacing.two,
+  },
+  input: {
+    backgroundColor: "white",
+    borderColor: "#8e8e93",
+    borderRadius: Spacing.two,
+    borderWidth: 1,
+    color: "#11181c",
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
   title: {
     textAlign: "center",
   },
@@ -97,6 +123,14 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.four,
+  },
+  todoRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: Spacing.two,
+  },
+  todoText: {
+    flex: 1,
   },
   scrollContainer: {
     height: 200,
