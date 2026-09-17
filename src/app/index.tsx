@@ -1,5 +1,14 @@
 import * as Device from "expo-device";
-import { Button, Platform, ScrollView, StyleSheet } from "react-native";
+import {
+  Button,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+  Pressable,
+  Text,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -31,12 +40,18 @@ function getDevMenuHint() {
 
 export default function HomeScreen() {
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [newItem, setNewItem] = useState("");
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
     setItems([...items, newItem]);
   };
 
+  const delItem = (i) => {
+    let copyItems = [...items];
+    copyItems.splice(i, 1);
+    setItems(copyItems);
+  };
+  
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -45,6 +60,13 @@ export default function HomeScreen() {
           <ThemedText type="title" style={styles.title}>
             ToDo List
           </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.heroSection}  type="backgroundElement">
+          <TextInput
+            value={newItem} 
+           placeholder="Write ur item here"
+            onChangeText={(newText) => setNewItem(newText)}
+          />
         </ThemedView>
         <ThemedView style={styles.heroSection}>
           <Button title={"Add todo"} onPress={addItem} />
@@ -55,8 +77,15 @@ export default function HomeScreen() {
         </ThemedText>
         <ScrollView style={styles.scrollContainer}>
           <ThemedView type="backgroundElement" style={styles.stepContainer}>
-            {items.map((item) => (
-              <HintRow key={item} title={item} />
+            {items.map((item, i) => (
+              <View key={i} style={styles.row}>
+                <View style={styles.rowText}>
+                  <HintRow title={item} />
+                </View>
+                <Pressable onPress={()=>delItem(i)} style={styles.deleteBtn}>
+                  <Text style={styles.deleteIcon}>✕</Text>
+                </Pressable>
+              </View>
             ))}
           </ThemedView>
         </ScrollView>
@@ -97,10 +126,29 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.four,
+    flex: 1,
   },
   scrollContainer: {
-    height: 200,
+
     width: "100%",
     borderRadius: Spacing.four,
+    flex: 1,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  rowText: {
+    flex: 1,
+  },
+  deleteBtn: {
+    backgroundColor: "red",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  deleteIcon: {
+    color: "white",
   },
 });
