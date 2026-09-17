@@ -1,5 +1,5 @@
 import * as Device from "expo-device";
-import { Button, Platform, ScrollView, StyleSheet } from "react-native";
+import { Button, Platform, ScrollView, StyleSheet, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -31,10 +31,15 @@ function getDevMenuHint() {
 
 export default function HomeScreen() {
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [inputText, setInputText] = useState("");
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    setItems([...items, inputText]);
+    setInputText("");
+  };
+
+  const removeFirstItem = () => {
+    setItems(items.slice(1));
   };
 
   return (
@@ -46,8 +51,15 @@ export default function HomeScreen() {
             ToDo List
           </ThemedText>
         </ThemedView>
+
         <ThemedView style={styles.heroSection}>
-          <Button title={"Add todo"} onPress={addItem} />
+          <TextInput
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Введите задачу..."
+          />
+          <Button title="Добавить" onPress={addItem} />
         </ThemedView>
 
         <ThemedText type="code" style={styles.code}>
@@ -60,6 +72,9 @@ export default function HomeScreen() {
             ))}
           </ThemedView>
         </ScrollView>
+
+        <Button title="Удалить первую" onPress={removeFirstItem} />
+
         {Platform.OS === "web" && <WebBadge />}
       </SafeAreaView>
     </ThemedView>
@@ -102,5 +117,13 @@ const styles = StyleSheet.create({
     height: 200,
     width: "100%",
     borderRadius: Spacing.four,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    width: "100%",
   },
 });
