@@ -29,12 +29,23 @@ function getDevMenuHint() {
   );
 }
 
+let nextId = 0;
+
 export default function HomeScreen() {
-  const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [items, setItems] = useState([
+
+  ]);
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    setItems([...items, { id: nextId++, title: "Новая задача" }]);
+  };
+
+  const updateItem = (id: number, title: string) => {
+    setItems(items.map((item) => (item.id === id ? { ...item, title } : item)));
+  };
+
+  const removeItem = (id: number) => {
+    setItems(items.filter((item) => item.id !== id));
   };
 
   return (
@@ -56,7 +67,12 @@ export default function HomeScreen() {
         <ScrollView style={styles.scrollContainer}>
           <ThemedView type="backgroundElement" style={styles.stepContainer}>
             {items.map((item) => (
-              <HintRow key={item} title={item} />
+              <HintRow
+                key={item.id}
+                title={item.title}
+                onChangeTitle={(title) => updateItem(item.id, title)}
+                onRemove={() => removeItem(item.id)}
+              />
             ))}
           </ThemedView>
         </ScrollView>
