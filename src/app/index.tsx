@@ -9,6 +9,8 @@ import { ThemedView } from "@/components/themed-view";
 import { WebBadge } from "@/components/web-badge";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { useState } from "react";
+import { TextInput } from "react-native";
+
 
 function getDevMenuHint() {
   if (Platform.OS === "web") {
@@ -31,10 +33,24 @@ function getDevMenuHint() {
 
 export default function HomeScreen() {
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [text, setText] = useState<string>("")
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    const newItem = `Test ${items.length + 1} ${text}`;
+    setItems([...items, newItem]);    
+    
+  };
+
+  const deleteItem = () => {
+    
+    for (let i = 1; i < items.length; i++){
+
+      items[i] = items[i].slice(0, 5) + String(parseInt(items[i].slice(5, items[i].length)) - 1) + items[i].slice((items[i].slice(0, 5) + String(parseInt(items[i].slice(5, items[i].length)))).length, items[i].length);
+    }
+    
+    setItems(prev => prev.slice(1));
+    
+
   };
 
   return (
@@ -47,8 +63,21 @@ export default function HomeScreen() {
           </ThemedText>
         </ThemedView>
         <ThemedView style={styles.heroSection}>
+          <TextInput
+            style={[
+              styles.input
+            
+            ]}
+            placeholder = "Введите текст"
+            value = {text}
+            onChangeText = {setText}
+          />
           <Button title={"Add todo"} onPress={addItem} />
+          <Button title = {"Delete"} onPress={deleteItem}/>
         </ThemedView>
+
+        
+         
 
         <ThemedText type="code" style={styles.code}>
           Your todos:
@@ -67,6 +96,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  input: {
+    borderWidth: 1
+  },
   container: {
     flex: 1,
     justifyContent: "center",
