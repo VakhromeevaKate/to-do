@@ -1,5 +1,5 @@
 import * as Device from "expo-device";
-import { Button, Platform, ScrollView, StyleSheet } from "react-native";
+import { Button, Platform, ScrollView, StyleSheet, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedIcon } from "@/components/animated-icon";
@@ -31,10 +31,16 @@ function getDevMenuHint() {
 
 export default function HomeScreen() {
   const [items, setItems] = useState<string[]>(["Test 1", "Test 2"]);
+  const [inputText, setInputText] = useState("");
 
   const addItem = () => {
-    const newItem = `Test ${items.length + 1}`;
-    setItems([...items, newItem]);
+    if (inputText.trim() === "") return;
+    setItems([...items, inputText]);
+    setInputText("");
+  };
+
+  const deleteItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
   };
 
   return (
@@ -46,20 +52,33 @@ export default function HomeScreen() {
             ToDo List
           </ThemedText>
         </ThemedView>
+
         <ThemedView style={styles.heroSection}>
-          <Button title={"Add todo"} onPress={addItem} />
+          <TextInput
+            style={styles.input}
+            placeholder="добавить"
+            value={inputText}
+            onChangeText={setInputText}
+          />
+          <Button title="Add todo" onPress={addItem} />
         </ThemedView>
 
         <ThemedText type="code" style={styles.code}>
           Your todos:
         </ThemedText>
+
         <ScrollView style={styles.scrollContainer}>
           <ThemedView type="backgroundElement" style={styles.stepContainer}>
-            {items.map((item) => (
-              <HintRow key={item} title={item} />
+            {items.map((item, index) => (
+              <HintRow
+                key={index}
+                title={item}
+                onDelete={() => deleteItem(index)}
+              />
             ))}
           </ThemedView>
         </ScrollView>
+
         {Platform.OS === "web" && <WebBadge />}
       </SafeAreaView>
     </ThemedView>
@@ -102,5 +121,12 @@ const styles = StyleSheet.create({
     height: 200,
     width: "100%",
     borderRadius: Spacing.four,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    padding: 10,
+    width: "100%",
   },
 });
